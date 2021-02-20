@@ -1,6 +1,7 @@
 # osqutil
 
 osqutil is an OSQuery Command-Line Utility tool designed to simplify writing basic queries.
+[Learn More About OSQuery](https://osquery.io/)
 
 Supported Tables:
   - registry  : search by path
@@ -11,7 +12,8 @@ Supported Tables:
 Syntax is as follows:
 osqutil.exe -tablename [args]
 
-#Examples:
+**Examples:**
+
 outputs a query for a specific registry path and copies it to the clipboard (-copy flag)
 ````console
 osqutil -registry HKEY_USERS\*\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU\* -copy
