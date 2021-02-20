@@ -103,14 +103,14 @@ func ParseHive(szHive string) string {
 // Outputs the basic registry query for osquery
 func BasicRegQuery(szRegKey string) string {
 	szBasicQuery := "SELECT datetime(mtime, 'unixepoch', 'localtime') AS last_edited, data, path FROM registry WHERE path"
-	bContainsWildcard := strings.ContainsAny(szRegKey, "*")
+	szRegKey, bContainsWildcard := ParseRegKey(szRegKey)
 
 	if bContainsWildcard {
 		// checking if searching in hku for specific query
 		if strings.ContainsAny(szRegKey, "HKEY_USERS") {
 			szBasicQuery = "SELECT datetime(reg.mtime, 'unixepoch', 'localtime') AS last_edited, reg.data, reg.path, u.username FROM registry reg JOIN users u ON split(reg.path, '\\', 1)=u.uuid WHERE path LIKE \"" + strings.ReplaceAll(szRegKey, "*", "%") + "\";"
 		} else {
-			szBasicQuery = szBasicQuery + " LIKE \"" + strings.ReplaceAll(szRegKey, "*", "%") + "\";"
+			szBasicQuery = szBasicQuery + " LIKE \"" + szRegKey + "\";"
 		}
 	} else {
 		szBasicQuery = szBasicQuery + "=\"" + szRegKey + "\";"
