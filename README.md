@@ -11,7 +11,7 @@ Supported Tables:
 Syntax is as follows:
 osqutil.exe -tablename [args]
 
-Examples:
+#Examples:
 outputs a query for a specific registry path and copies it to the clipboard (-copy flag)
 ````console
 osqutil -registry HKEY_USERS\*\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU\* -copy
