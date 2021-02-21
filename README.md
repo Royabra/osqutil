@@ -5,9 +5,11 @@ osqutil is an OSQuery Command-Line Utility tool designed to simplify writing bas
 
 Supported Tables:
   - registry  : search by path
-  - processes : search by path, pid, cmdline, name 
-  - file      : search by path, you can use -hash to output a query including hashes
+  - processes : search by path, pid, cmdline, name, supports -hash for path only
+  - file      : search by path, supports -hash
   - services  : search by name or binary path
+  - dns       : search by domain name
+  - ntfs      : search by path, supports -hash
 
 Optional Commands:
   - hash : add a hash calculation to the query, check tables that support this kind of command
@@ -16,7 +18,7 @@ Optional Commands:
 **Syntax is as follows:**
 osqutil.exe -tablename column value -OptionalCommands
 
-A Good rule of thumb is that if a table only supports one column, the column name isn't specified
+A Good rule of thumb is that if a table only supports one column, such as -dns or -ntfs, the column name isn't specified
 
 **Examples:**
 
