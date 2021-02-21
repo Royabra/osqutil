@@ -13,7 +13,7 @@ Optional Commands:
   - hash : add a hash calculation to the query, check tables that support this kind of command
   - copy : copies query to the clipboard
 
-Syntax is as follows:
+**Syntax is as follows:**
 osqutil.exe -tablename column value -OptionalCommands
 
 A Good rule of thumb is that if a table only supports one column, the column name isn't specified
