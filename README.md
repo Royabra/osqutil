@@ -10,8 +10,8 @@ Supported Tables:
   - services  : search by name or binary path
 
 Optional Commands:
-  -hash : add a hash calculation to the query, check tables that support this kind of command
-  -copy : copies query to the clipboard
+  - hash : add a hash calculation to the query, check tables that support this kind of command
+  - copy : copies query to the clipboard
 
 Syntax is as follows:
 osqutil.exe -tablename column value -OptionalCommands
