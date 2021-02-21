@@ -3,7 +3,7 @@
 osqutil is an OSQuery Command-Line Utility tool designed to simplify writing basic queries.
 [Learn More About OSQuery](https://osquery.io/)
 
-Supported Tables:
+**Supported Tables:**
   - registry  : search by path
   - processes : search by path, pid, cmdline, name, supports -hash for path only
   - file      : search by path, supports -hash
