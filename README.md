@@ -15,6 +15,7 @@ Optional Commands:
 
 Syntax is as follows:
 osqutil.exe -tablename column value -OptionalCommands
+
 A Good rule of thumb is that if a table only supports one column, the column name isn't specified
 
 **Examples:**
