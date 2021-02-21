@@ -34,3 +34,7 @@ outputs a query to calculate the hash of the given path
 ````console
 osqutil -file C:\Windows\*\cmd.exe -hash
 ````
+outputs a query searching a domain name that contains bad.com and copies it the clipboard
+````console
+osqutil -dns *bad.com* -copy
+````
