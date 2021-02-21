@@ -9,8 +9,12 @@ Supported Tables:
   - file      : search by path, you can use -hash to output a query including hashes
   - services  : search by name or binary path
 
+Optional Commands:
+  -hash : add a hash calculation to the query, check tables that support this kind of command
+  -copy : copies query to the clipboard
+
 Syntax is as follows:
-osqutil.exe -tablename [args]
+osqutil.exe -tablename column value -OptionalCommands
 
 **Examples:**
 
