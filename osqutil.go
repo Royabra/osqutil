@@ -1,7 +1,6 @@
 package main
 
 import (
-	//"bufio"
 	"fmt"
 	"os"
 	"strings"
@@ -33,36 +32,51 @@ var (
 
 func main() {
 	szTable := os.Args[1]
-	szToCopy := os.Args[len(os.Args)-1]
 	var result string
+	bCalcHash := false
+	bToCopy := false
+	// checking if hash needs to calculated
+	for i := 0; i < len(os.Args); i++ {
+		if strings.ToLower(os.Args[i]) == "-hash" {
+			bCalcHash = true
+		} else if strings.ToLower(os.Args[i]) == "-copy" {
+			bToCopy = true
+		}
+	}
 
+	// Checking table
 	switch strings.ToLower(szTable) {
 	case "-registry":
-		result = BasicRegQuery(os.Args[2])
+		result = BasicRegQuery(os.Args[2], bCalcHash)
 	case "-services":
 		if strings.ToLower(os.Args[2]) == "path" {
-			result = ServiceQueryByPath(os.Args[3])
+			result = ServiceQueryByPath(os.Args[3], bCalcHash)
 		} else if strings.ToLower(os.Args[2]) == "name" {
-			result = ServiceQueryByName(os.Args[3])
+			result = ServiceQueryByName(os.Args[3], bCalcHash)
 		} else {
-			println("ERROR: Incorrect Syntax")
+			println("ERROR: Incorrect Syntax, columns supported are path and name")
 		}
 	case "-processes":
 		if strings.ToLower(os.Args[2]) == "path" {
-			result = ProcQueryByPath(os.Args[3])
+			result = ProcQueryByPath(os.Args[3], bCalcHash)
 		} else {
-			result = ProcGenericQuery(os.Args[2], os.Args[3])
+			result = ProcGenericQuery(os.Args[2], os.Args[3], bCalcHash)
 		}
 	case "-file":
-		bCalcHash := (strings.ToLower(os.Args[3]) == "-hash")
 		result = BasicFileQuery(os.Args[2], bCalcHash)
+	case "-ntfs":
+		result = BasicNtfsQuery(os.Args[2], bCalcHash)
+	case "-dns":
+		result = BasicDnsQuery(os.Args[2], bCalcHash)
 	default:
 		PrintHelpMsg()
 	}
 
+	// Printing results
 	println(result)
 
-	if "-copy" == strings.ToLower(szToCopy) {
+	// Copying to clipboard if mentioned
+	if bToCopy {
 		CopyToClipboard(result)
 	}
 }
@@ -101,13 +115,17 @@ func ParseHive(szHive string) string {
 }
 
 // Outputs the basic registry query for osquery
-func BasicRegQuery(szRegKey string) string {
+func BasicRegQuery(szRegKey string, bCalcHash bool) string {
+	if bCalcHash {
+		println("Calculating hash is not supported")
+	}
+
 	szBasicQuery := "SELECT datetime(mtime, 'unixepoch', 'localtime') AS last_edited, data, path FROM registry WHERE path"
 	szRegKey, bContainsWildcard := ParseRegKey(szRegKey)
 
 	if bContainsWildcard {
 		// checking if searching in hku for specific query
-		if strings.ContainsAny(szRegKey, "HKEY_USERS") {
+		if strings.Contains(szRegKey, "HKEY_USERS") {
 			szBasicQuery = "SELECT datetime(reg.mtime, 'unixepoch', 'localtime') AS last_edited, reg.data, reg.path, u.username FROM registry reg JOIN users u ON split(reg.path, '\\', 1)=u.uuid WHERE path LIKE \"" + strings.ReplaceAll(szRegKey, "*", "%") + "\";"
 		} else {
 			szBasicQuery = szBasicQuery + " LIKE \"" + szRegKey + "\";"
@@ -152,58 +170,75 @@ func BasicFileQuery(szFilepath string, bCalcHash bool) string {
 	} else {
 		szBasicFileQuery = szBasicFileQuery + "datetime(mtime, 'unixepoch', 'localtime') AS last_edited, " +
 			"datetime(atime, 'unixepoch', 'localtime') AS last_accessed, datetime(btime, 'unixepoch', 'localtime') " +
-			"AS creation_time, path FROM file WHERE path LIKE '" + strings.ReplaceAll(szFilepath, "*", "%") + "'%;"
+			"AS creation_time, path FROM file WHERE path LIKE '" + strings.ReplaceAll(szFilepath, "*", "%") + "%';"
 	}
 
 	return szBasicFileQuery
 }
 
 // Outputs a query that queries services by name
-func ServiceQueryByName(szServiceName string) string {
+func ServiceQueryByName(szServiceName string, bCalcHash bool) string {
+
+	if bCalcHash {
+		println("Calculating hash is not supported")
+	}
 
 	if strings.ContainsAny(szServiceName, "*") {
-		return "SELECT name, path, user_account, status, service_status FROM services WHERE name LIKE '" + strings.ReplaceAll(szServiceName, "*", "%") + "';"
+		return "SELECT name, path, user_account, status, start_type FROM services WHERE name LIKE '" + strings.ReplaceAll(szServiceName, "*", "%") + "';"
 	} else {
-		return "SELECT name, path, user_account, status, service_status FROM services WHERE name='" + szServiceName + "';"
+		return "SELECT name, path, user_account, status, start_type FROM services WHERE name='" + szServiceName + "';"
 	}
 }
 
 // Outputs a query that queries services by their binary path
 // TODO: Add hash calc functionality
-func ServiceQueryByPath(szBinaryPath string) string {
+func ServiceQueryByPath(szBinaryPath string, bCalcHash bool) string {
 	if !CheckPath(szBinaryPath) {
 		fmt.Println("WARNING! this path wasn't found on your machine, are you sure it's spelled correctly? \n")
 	}
 
+	if bCalcHash {
+		println("Calculating hash is not supported")
+	}
+
 	if strings.ContainsAny(szBinaryPath, "*") {
-		return "SELECT name, path, user_account, status, service_status FROM services WHERE path LIKE '" + strings.ReplaceAll(szBinaryPath, "*", "%") + "';"
+		return "SELECT name, path, user_account, status, start_type FROM services WHERE path LIKE '" + strings.ReplaceAll(szBinaryPath, "*", "%") + "';"
 	} else {
-		return "SELECT name, path, user_account, status, service_status FROM services WHERE path='" + szBinaryPath + "';"
+		return "SELECT name, path, user_account, status, start_type FROM services WHERE path='" + szBinaryPath + "';"
 	}
 }
 
 // Outputs a simple query for processes by their path
 // TODO: Add hash calc functionality
-func ProcQueryByPath(szBinaryPath string) string {
+func ProcQueryByPath(szBinaryPath string, bCalcHash bool) string {
 	if !CheckPath(szBinaryPath) {
 		fmt.Println("WARNING! this path wasn't found on your machine, are you sure it's spelled correctly?")
 	}
 
-	if strings.ContainsAny(szBinaryPath, "*") {
-		return "SELECT p.name, p.pid, p.path, p.cmdline u.username FROM processes p JOIN users u ON p.uid=u.uid WHERE path LIKE '" +
+	if strings.ContainsAny(szBinaryPath, "*") && bCalcHash {
+		return "SELECT p.name, p.pid, p.path, p.cmdline, u.username, h.sha1 FROM processes p JOIN users u ON u.uid=p.uid JOIN hash h ON h.path=p.path WHERE p.path LIKE '" +
+			strings.ReplaceAll(szBinaryPath, "*", "%") + "';"
+	} else if bCalcHash {
+		return "SELECT p.name, p.pid, p.path, p.cmdline, u.username FROM processes p JOIN users u ON u.uid=p.uid JOIN hash h ON h.path=p.path WHERE p.path='" + szBinaryPath + "';"
+	} else if strings.ContainsAny(szBinaryPath, "*") {
+		return "SELECT p.name, p.pid, p.path, p.cmdline, u.username FROM processes p JOIN users u ON u.uid=p.uid JOIN WHERE p.path LIKE '" +
 			strings.ReplaceAll(szBinaryPath, "*", "%") + "';"
 	} else {
-		return "SELECT p.name, p.pid, p.path, p.cmdline u.username FROM processes p JOIN users u ON p.uid=u.uid WHERE path='" + szBinaryPath + "';"
+		return "SELECT p.name, p.pid, p.path, p.cmdline, u.username FROM processes p JOIN users u ON u.uid=p.uid WHERE p.path='" + szBinaryPath + "';"
 	}
 }
 
 // A less wrapped query generator for processes
-func ProcGenericQuery(szColumn string, szValue string) string {
+func ProcGenericQuery(szColumn string, szValue string, bCalcHash bool) string {
+	if bCalcHash {
+		println("Calculating hash is not supported, try by path")
+	}
+
 	if strings.ContainsAny(szValue, "*") {
-		return "SELECT p.name, p.pid, p.path, p.cmdline u.username FROM processes p JOIN users u ON p.uid=u.uid WHERE p." +
+		return "SELECT p.name, p.pid, p.path, p.cmdline, u.username FROM processes p JOIN users u ON p.uid=u.uid WHERE p." +
 			szColumn + " LIKE '" + strings.ReplaceAll(szValue, "*", "%") + "';"
 	} else {
-		return "SELECT p.name, p.pid, p.path, p.cmdline u.username FROM processes p JOIN users u ON p.uid=u.uid WHERE p." +
+		return "SELECT p.name, p.pid, p.path, p.cmdline, u.username FROM processes p JOIN users u ON p.uid=u.uid WHERE p." +
 			szColumn + "='" + szValue + "';"
 	}
 }
@@ -277,10 +312,47 @@ func CopyToClipboard(text string) error {
 func PrintHelpMsg() {
 	println("OSQuery Utility \n \nEases query writing for OSQuery \n")
 	println("Usage: \n")
-	println("osqutil.exe -tablename [args] \n")
-	println("Available Tables: \n -registry : search by path \n -services : search by executable path or name \n -file : search by path")
-	println(" -processes : search by path, pid, cmdline, name \n")
+	println("osqutil.exe -tablename column value -OptionalCommands \n")
+	println("Available Tables: \n -registry : search by path \n -services : search by executable path or name \n -file : search by path, supports -hash")
+	println(" -processes : search by path, pid, cmdline, name, supports -hash when searching by path \n -ntfs : ntfs_acl_permissions, search by path, supports -hash")
+	println(" -dns : dns_cache, search by domain name")
 	println("Common options: \n -hash : In the file table you can use -hash to output a query including hashes")
-	println("-copy : copies to clipboard, needs to be the last arguement \n")
+	println(" -copy : copies to clipboard, needs to be the last arguement \n")
 	println("Examples: \n osqutil -file C:\\Windows\\*\\cmd.exe -hash -copy \n osqutil -processes name mspaint.exe \n osqutil -registry hklm\\software\\*")
+	println("For More Information Please visit github.com/Roybara/osqutil")
+}
+
+func BasicNtfsQuery(szPath string, bCalcHash bool) string {
+	bIsFile := strings.ContainsAny(szPath, ".")
+	szBasicNtfsQuery := "SELECT "
+
+	if !CheckPath(szPath) {
+		fmt.Println("WARNING! this path wasn't found on your machine, are you sure it's spelled correctly? \n")
+	}
+
+	if bIsFile && bCalcHash {
+		szBasicNtfsQuery = szBasicNtfsQuery + "nap.path, nap.type, nap.principal, nap.access, nap.inherited_from, h.sha1 from ntfs_acl_permissions nap JOIN " +
+			"hash h ON nap.path=h.path WHERE path='" + szPath + "';"
+	} else if bIsFile {
+		szBasicNtfsQuery = szBasicNtfsQuery + "* from ntfs_acl_permissions WHERE path='" + szPath + "';"
+	} else if bCalcHash {
+		szBasicNtfsQuery = szBasicNtfsQuery + "nap.path, nap.type, nap.principal, nap.access, nap.inherited_from, h.sha1 from ntfs_acl_permissions nap JOIN " +
+			"hash h ON nap.path=h.path WHERE path LIKE '" + strings.ReplaceAll(szPath, "*", "%") + "%';"
+	} else {
+		szBasicNtfsQuery = szBasicNtfsQuery + "* from ntfs_acl_permissions WHERE path LIKE '" + strings.ReplaceAll(szPath, "*", "%") + "%';"
+	}
+
+	return szBasicNtfsQuery
+}
+
+func BasicDnsQuery(szDomain string, bCalcHash bool) string {
+	if bCalcHash {
+		println("Calculating hash is not supported")
+	}
+
+	if strings.ContainsAny(szDomain, "*") {
+		return "SELECT * FROM dns_cache WHERE name LIKE '" + strings.ReplaceAll(szDomain, "*", "%") + "';"
+	} else {
+		return "SELECT * FROM dns_cache WHERE name='" + szDomain + "'"
+	}
 }
