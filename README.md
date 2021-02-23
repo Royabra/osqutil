@@ -42,7 +42,7 @@ outputs a query searching a domain name that contains bad.com, executes it and s
 ````console
 osqutil -dns *bad.com* -execute -json C:\path\to\myfile.json
 ````
-outputs a query searching if the patch is not present, executing it and setting the output format to csv
+outputs a query searching if the patch is not present, executes it and presents results as csv
 ````console
 osqutil -patch KB4534170 !exists -execute -csv
 ````
