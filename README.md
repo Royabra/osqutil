@@ -15,7 +15,7 @@ osqutil is an OSQuery Command-Line Utility tool designed to simplify writing bas
 **Optional Commands:**
   - hash    : add a hash calculation to the query, check tables that support this kind of command
   - copy    : copies query to the clipboard
-  - execute : executes the generated query is osqueryi
+  - execute : executes the generated query in osqueryi
   - csv     : must come after -execute, formats the result to csv, results can be saved in a file (see examples!)
   - json    : must come after -execute, formats the result to json, results can be saved in a file
 
