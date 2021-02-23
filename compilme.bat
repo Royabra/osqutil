@@ -1,1 +1,1 @@
-go build osqutil.go
+go build osqutil
