@@ -10,10 +10,14 @@ osqutil is an OSQuery Command-Line Utility tool designed to simplify writing bas
   - services  : search by name or binary path
   - dns       : search by domain name
   - ntfs      : search by path, supports -hash
+  - patches   : search by hotfix_id, must specify if specific hotfix_id searched is present or not (exists or !exists)
 
 Optional Commands:
-  - hash : add a hash calculation to the query, check tables that support this kind of command
-  - copy : copies query to the clipboard
+  - hash    : add a hash calculation to the query, check tables that support this kind of command
+  - copy    : copies query to the clipboard
+  - execute : executes the generated query is osqueryi
+  - csv     : must come after -execute, formats the result to csv, results can be saved in a file (see examples!)
+  - json    : must come after -execute, formats the result to json, results can be saved in a file
 
 **Syntax is as follows:**
 osqutil.exe -tablename column value -OptionalCommands
@@ -26,15 +30,19 @@ outputs a query for a specific registry path and copies it to the clipboard (-co
 ````console
 osqutil -registry HKEY_USERS\*\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU\* -copy
 ````
-outputs a query for processes whose name is evil.exe
+outputs a query for processes whose name is evil.exe and executes it
 ````console
-osqutil -processes name evil.exe
+osqutil -processes name evil.exe -execute
 ````
 outputs a query to calculate the hash of the given path
 ````console
 osqutil -file C:\Windows\*\cmd.exe -hash
 ````
-outputs a query searching a domain name that contains bad.com and copies it the clipboard
+outputs a query searching a domain name that contains bad.com, executes it and saves to json file
 ````console
-osqutil -dns *bad.com* -copy
+osqutil -dns *bad.com* -execute -json C:\path\to\myfile.json
+````
+outputs a query searching if the patch is not present, executing it and setting the output format to csv
+````console
+osqutil -patch KB4534170 !exists -execute -csv
 ````
