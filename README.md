@@ -12,7 +12,7 @@ osqutil is an OSQuery Command-Line Utility tool designed to simplify writing bas
   - ntfs      : search by path, supports -hash
   - patches   : search by hotfix_id, must specify if specific hotfix_id searched is present or not (exists or !exists)
 
-Optional Commands:
+**Optional Commands:**
   - hash    : add a hash calculation to the query, check tables that support this kind of command
   - copy    : copies query to the clipboard
   - execute : executes the generated query is osqueryi
