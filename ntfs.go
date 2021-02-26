@@ -7,24 +7,25 @@ import (
 
 // Outputs a basic ntfs_acl_permissions query
 func BasicNtfsQuery(szPath string, bCalcHash bool) string {
-	bIsFile := strings.ContainsAny(szPath, ".")
-	szBasicNtfsQuery := "SELECT "
+	var szOperator string
+	if strings.ContainsAny(szPath, ".") {
+		szOperator = "="
+	} else {
+		szPath = strings.ReplaceAll(szPath, "*", "%")
+		szOperator = " LIKE "
+	}
+	var szBasicNtfsQuery string
 
 	if !CheckPath(szPath) {
 		fmt.Println("WARNING! this path wasn't found on your machine, are you sure it's spelled correctly? \n")
 	}
 
-	if bIsFile && bCalcHash {
-		szBasicNtfsQuery = szBasicNtfsQuery + "nap.path, nap.type, nap.principal, nap.access, nap.inherited_from, h.sha1 from ntfs_acl_permissions nap JOIN " +
-			"hash h ON nap.path=h.path WHERE path='" + szPath + "';"
-	} else if bIsFile {
-		szBasicNtfsQuery = szBasicNtfsQuery + "* from ntfs_acl_permissions WHERE path='" + szPath + "';"
-	} else if bCalcHash {
-		szBasicNtfsQuery = szBasicNtfsQuery + "nap.path, nap.type, nap.principal, nap.access, nap.inherited_from, h.sha1 from ntfs_acl_permissions nap JOIN " +
-			"hash h ON nap.path=h.path WHERE path LIKE '" + strings.ReplaceAll(szPath, "*", "%") + "%';"
+	if bCalcHash {
+		szBasicNtfsQuery = "SELECT nap.path, nap.type, nap.principal, nap.access, nap.inherited_from, h.sha1 from ntfs_acl_permissions nap JOIN " +
+			"hash h ON nap.path=h.path WHERE path"
 	} else {
-		szBasicNtfsQuery = szBasicNtfsQuery + "* from ntfs_acl_permissions WHERE path LIKE '" + strings.ReplaceAll(szPath, "*", "%") + "%';"
+		szBasicNtfsQuery = "SELECT * from ntfs_acl_permissions WHERE path"
 	}
 
-	return szBasicNtfsQuery
+	return szBasicNtfsQuery + szOperator + "'" + szPath + "';"
 }
