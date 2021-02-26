@@ -12,7 +12,7 @@ osqutil is an OSQuery Command-Line Utility tool designed to simplify writing bas
   - ntfs      : search by path, supports -hash
   - patches   : search by hotfix_id, must specify if specific hotfix_id searched is present or not (exists or !exists)
   - users     : search by name, SID and shell
-  - memory    : presents loaded modules in memory, search by name (of the process), pid, permissions and path (of loaded module)
+  - memory    : presents loaded modules in memory, search by name (of the process), pid, permissions, path (of loaded module)
   - pipes     : search by pid, name (of process), pipe (name of the pipe), flags
   - sockets   : search by pid, name (of process), lport (local port), rport (remote port), address (remote address)
 
