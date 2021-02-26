@@ -105,6 +105,14 @@ func main() {
 		} else {
 			PrintHelpMsg()
 		}
+	case "-sockets":
+		result = BasicSocketsQuery(os.Args[2], os.Args[3], bCalcHash)
+	case "-users":
+		result = BasicUsersQuery(os.Args[2], os.Args[3], bCalcHash)
+	case "-memory":
+		result = BasicMemoryQuery(os.Args[2], os.Args[3], bCalcHash)
+	case "-pipes":
+		result = BasicPipesQuery(os.Args[2], os.Args[3], bCalcHash)
 	default:
 		PrintHelpMsg()
 	}
