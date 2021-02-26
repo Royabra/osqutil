@@ -7,10 +7,14 @@ osqutil is an OSQuery Command-Line Utility tool designed to simplify writing bas
   - registry  : search by path
   - processes : search by path, pid, cmdline, name, supports -hash for path only
   - file      : search by path, supports -hash
-  - services  : search by name or binary path
+  - services  : search by name or path
   - dns       : search by domain name
   - ntfs      : search by path, supports -hash
   - patches   : search by hotfix_id, must specify if specific hotfix_id searched is present or not (exists or !exists)
+  - users     : search by name, SID and shell
+  - memory    : presents loaded modules in memory, search by name (of the process), pid, permissions and path (of loaded module)
+  - pipes     : search by pid, name (of process), pipe (name of the pipe), flags
+  - sockets   : search by pid, name (of process), lport (local port), rport (remote port), address (remote address)
 
 **Optional Commands:**
   - hash    : add a hash calculation to the query, check tables that support this kind of command
@@ -45,4 +49,12 @@ osqutil -dns *bad.com* -execute -json C:\path\to\myfile.json
 outputs a query searching if the patch is not present, executes it and presents results as csv
 ````console
 osqutil -patch KB4534170 !exists -execute -csv
+````
+outputs a query searching for all modules loaded by 'evil.exe'
+````console
+osqutil -memory name evil.exe
+````
+outputs a query searching for sockets whose local port is 4444
+````console
+osqutil -sockets lport 4444
 ````
